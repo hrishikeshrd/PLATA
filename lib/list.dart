@@ -1,8 +1,8 @@
-import 'dart:developer';
-import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'dart:async';
+
+import 'package:webview_flutter/webview_flutter.dart';
 
 class ListCurrency extends StatefulWidget {
   @override
@@ -10,73 +10,70 @@ class ListCurrency extends StatefulWidget {
 }
 
 class _ListCurrencyState extends State<ListCurrency> {
-  List currencies ;
-  
 
-  @override
-  void initState(){
-    super.initState();
-    _loadcCurrencies();
-  }
+  final fromController = TextEditingController( );
+  String name;
+  final Completer<WebViewController> _completer = Completer<WebViewController>();
 
-  Future<String> _loadcCurrencies() async{
-    String uri = "https://api.exchangeratesapi.io/latest";
-    var response =await http.get(Uri.encodeFull(uri), headers: {"Accept": "application/json"});
-    var responseBody = json.decode(response.body);
-    Map curMap = responseBody['rates'];
 
-    currencies = curMap.keys.toList();
-    setState(() {
-      
-    });
-    print(currencies);
-    return "Success";
-   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.black,
       child: Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
-        backgroundColor: Colors.black,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: Center(child: Text('PLATA',style: TextStyle(fontWeight: FontWeight.w400,letterSpacing: 4, fontSize: 25),)),
-      ),
-      body: currencies == null ? Container(
-        color: Colors.black,
-        child: Center(
-          child: CircularProgressIndicator(
-                      backgroundColor: Colors.white,
-                  ),
+          backgroundColor: Colors.black,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          title: Center(child: Text('PLATA',style: TextStyle(fontWeight: FontWeight.w400,letterSpacing: 4, fontSize: 25),)),
+
         ),
-      ):
-      
-      
-       _rates(),
+        body: Container(
+          child: Column(
+            children: <Widget>[
+              Container(
+                color: Colors.white10,
+                child: ListTile(
+                  title: TextField(
+
+                    style: TextStyle(color: Colors.white,),
+                    cursorColor: Colors.white,
+                    decoration: InputDecoration(
+                      hintText: "Search Countries or Currency Name",
+                      hintStyle: TextStyle(color: Colors.white70,),
+
+                    ),
+
+
+                    controller: fromController,
+                  ),
+                  trailing: GestureDetector(
+                      onTap: (){
+                        setState(() {
+                          name= fromController.text;
+                        });
+                      },
+                      child: Icon(MdiIcons.mapSearchOutline, color: Colors.white,)),
+                ),
+              ),
+              Expanded(
+                child:name == ""? Container(color:Colors.black):WebView(
+                  initialUrl: "https://www.google.com/search?q=$name+currency+rate",
+                  onWebViewCreated: (WebViewController webViewController ){
+                    _completer.complete(webViewController);
+                  },
+                ),
+              ),
+
+            ],
+          ),
+        ),
       ),
     );
   }
-  Widget _rates(){
-      return new ListView.builder(
-        itemCount: currencies.length,
-        itemBuilder: (context,index){
-          
-          return Container(
-            child: Row(
-            children: <Widget>[
-            ClipRRect(
-              child: currencies[index],
-            ),
-        ],
-      ),
-          );
-        },
 
-        
-      );
-  }
 
- 
-  }
+}
+
