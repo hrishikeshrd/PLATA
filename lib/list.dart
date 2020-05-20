@@ -15,6 +15,23 @@ class _ListCurrencyState extends State<ListCurrency> {
   String name;
   final Completer<WebViewController> _completer = Completer<WebViewController>();
 
+  refresh(name) async{
+    setState(() {
+      loading(name);
+    });
+  }
+
+  loading(name) async{
+    setState(() {
+      WebView(
+        initialUrl: "https://www.google.com/search?q=$name+currency+rate",
+        onWebViewCreated: (WebViewController webViewController ){
+          _completer.complete(webViewController);
+        },
+      );
+
+    });
+  }
 
 
   @override
@@ -53,18 +70,23 @@ class _ListCurrencyState extends State<ListCurrency> {
                       onTap: (){
                         setState(() {
                           name= fromController.text;
+                          refresh(name);
                         });
                       },
                       child: Icon(MdiIcons.mapSearchOutline, color: Colors.white,)),
                 ),
               ),
               Expanded(
-                child:name == ""? Container(color:Colors.black):WebView(
-                  initialUrl: "https://www.google.com/search?q=$name+currency+rate",
-                  onWebViewCreated: (WebViewController webViewController ){
-                    _completer.complete(webViewController);
-                  },
-                ),
+                child:name == null? Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/earth.jpg'),
+                        fit: BoxFit.cover,
+
+                      ),
+                    ),
+
+                ):loading(name),
               ),
 
             ],
